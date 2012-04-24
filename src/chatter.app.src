@@ -5,7 +5,8 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+		  mnesia
                  ]},
   {mod, { chatter_app, []}},
   {env, []}
