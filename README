@@ -1,0 +1,3 @@
+rebar generate
+
+cd rel/mynode/bin/mynode console
