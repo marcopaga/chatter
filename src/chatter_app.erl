@@ -10,6 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
+    mnesia:start(),
     db:create_tables(),
     chatter_sup:start_link().
 
