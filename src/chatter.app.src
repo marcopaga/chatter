@@ -2,11 +2,11 @@
  [
   {description, ""},
   {vsn, "1"},
-  {registered, []},
+  {registered, [chatter_db]},
   {applications, [
                   kernel,
                   stdlib,
-		  mnesia
+		              mnesia
                  ]},
   {mod, { chatter_app, []}},
   {env, []}
