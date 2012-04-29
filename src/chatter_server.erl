@@ -1,17 +1,12 @@
--module(chatter_db).
+-module(chatter_server).
 -behaviour(gen_server).
 -define(SERVER, ?MODULE).
-
-%% Mnesia Tables
-
--record(user, {id, email}).
--record(message, {from_user_id, to_user_id, text, timestamp}).
 
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0, create_tables/0]).
+-export([start_link/0]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -27,9 +22,6 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-create_tables() ->
-	gen_server:call(?SERVER, create_tables).
-
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
@@ -37,9 +29,7 @@ create_tables() ->
 init(Args) ->
     {ok, Args}.
 
-handle_call(create_tables, _From, State) ->
-	mnesia:create_table(user, [{attributes, record_info(fields, user)}]),
-    mnesia:create_table(message, [{attributes, record_info(fields, message)}]),
+handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast(_Msg, State) ->
@@ -57,3 +47,4 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
+
