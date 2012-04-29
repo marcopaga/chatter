@@ -55,8 +55,7 @@ handle_call(create_tables, _From, State) ->
     error_logger:info_msg("The tables are created.\n"),
     {reply, ok, State};
     handle_call({create_user, [ {email, Email}, {password, Password}] }, _From, State) ->
-	NewUser = #user{email = Email, password = Password},
-	mnesia:dirty_write(NewUser),
+	mnesia:dirty_write(#user{email = Email, password = Password}),
 	{reply, ok, State}.
 
 handle_cast({create_message,[{from, From}, {to,To}, {text, Text}]}, State) ->
