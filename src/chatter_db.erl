@@ -59,7 +59,8 @@ handle_call({create_user, [ {email, Email}, {password, Password}] }, _From, Stat
 	{reply, ok, State}.
 
 handle_cast({create_message,[{from, From}, {to,To}, {text, Text}]}, State) ->
-	NewMessage = #message{from_user_email = From, to_user_email = To, text = Text},
+    Now = erlang:localtime(),
+	NewMessage = #message{from_user_email = From, to_user_email = To, text = Text, timestamp = Now},
 	Transaction = fun() ->
 		mnesia:write(NewMessage)
 	end,
