@@ -3,7 +3,9 @@
   {description, ""},
   {vsn, "1"},
   {registered, [
-                  chatter_db,
+                  chatter_app,
+                  chatter_sup,
+                  chatter_db,                  
                   chatter_server
                 ]},
   {applications, [

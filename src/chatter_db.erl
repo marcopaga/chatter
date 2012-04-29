@@ -4,14 +4,14 @@
 
 %% Mnesia Tables
 
--record(user, {id, email}).
--record(message, {from_user_id, to_user_id, text, timestamp}).
+-record(user, {email, password}).
+-record(message, {from_user_email, to_user_email, text, timestamp}).
 
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0, create_tables/0]).
+-export([start_link/0, create_tables/0, create_user/2, create_message/3]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -30,6 +30,12 @@ start_link() ->
 create_tables() ->
 	gen_server:call(?SERVER, create_tables).
 
+create_user(Email, Password) ->
+	gen_server:call(?SERVER, {create_user, [{email, Email}, {password, Password}] }).
+
+create_message(From, To, Text) ->
+	gen_server:cast(?SERVER, {create_message, [{from, From}, {to, To}, {text, Text}]}).
+
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
@@ -38,11 +44,27 @@ init(Args) ->
     {ok, Args}.
 
 handle_call(create_tables, _From, State) ->
-	mnesia:create_table(user, [{attributes, record_info(fields, user)}]),
-    mnesia:create_table(message, [{attributes, record_info(fields, message)}]),
-    {reply, ok, State}.
+	mnesia:create_table(user, [
+									{attributes, record_info(fields, user)},
+									{type, bag}
+								]),
+    mnesia:create_table(message, [
+    								{attributes, record_info(fields, message)},
+    								{type, bag}
+								]),
+    error_logger:info_msg("The tables are created.\n"),
+    {reply, ok, State};
+    handle_call({create_user, [ {email, Email}, {password, Password}] }, _From, State) ->
+	NewUser = #user{email = Email, password = Password},
+	mnesia:dirty_write(NewUser),
+	{reply, ok, State}.
 
-handle_cast(_Msg, State) ->
+handle_cast({create_message,[{from, From}, {to,To}, {text, Text}]}, State) ->
+	NewMessage = #message{from_user_email = From, to_user_email = To, text = Text},
+	Transaction = fun() ->
+		mnesia:write(NewMessage)
+	end,
+	mnesia:transaction(Transaction),
     {noreply, State}.
 
 handle_info(_Info, State) ->
