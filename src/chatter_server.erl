@@ -8,7 +8,7 @@
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0]).
+-export([start_link/0, parseCredentials/1]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -40,7 +40,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({tcp,Socket,RawData}, State = #state{} ) when State#state.userEmail == "" ->
-	{success, UserEmail} = try_authentication(Socket, RawData),
+	{success, UserEmail} = try_authentication(RawData),
 	{noreply, State#state{userEmail = UserEmail}};
 
 handle_info({tcp,Socket,RawData}, State = #state{} ) ->
@@ -67,6 +67,12 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
-try_authentication(Socket, RawData) ->
-	gen_tcp:send(Socket, "\nUsing your input as username!"),
-	{success, RawData}.
+try_authentication(RawData) ->
+    {credentials, User, Password} = parseCredentials(RawData),
+	error_logger:info_msg("~s tries to login with ~s",[User, Password]),
+	{success, User}.
+
+parseCredentials(RawData) ->
+	WithoutLineEndings = re:replace(RawData, "\r\n$", "", [{return, list}]),
+    {match, [User, Password]} = re:run(WithoutLineEndings, "(.*)/(.*)",[anchored, {capture, [1,2], list}]),
+    {credentials, User, Password}.
